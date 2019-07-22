@@ -1,0 +1,1 @@
+# SvelteWP-plugin
