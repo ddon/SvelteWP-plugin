@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: SvelteWP
- * Version:     1.0.3
+ * Version:     1.0.4
  * Author:      Fotki Agency / Dmitri Don
  * Text Domain: sveltewp
  * Domain Path: /languages
@@ -13,7 +13,7 @@ require_once(plugin_dir_path(__FILE__) . 'api/routing.php');
 
 function get_menu() {
     # Change 'menu' to your own navigation slug.
-    # just testing....
+    # just testing.... v4
     if (function_exists('pll_the_languages')) {
         global $polylang;
 
