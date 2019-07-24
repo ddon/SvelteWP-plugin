@@ -5,6 +5,7 @@
  * Author:      Fotki Agency / Dmitri Don
  * Text Domain: sveltewp
  * Domain Path: /languages
+ * GitHub Plugin URI: https://github.com/ddon/SvelteWP-plugin
  */
 
 require_once(plugin_dir_path(__FILE__) . 'api/routing.php');
