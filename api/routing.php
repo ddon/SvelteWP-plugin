@@ -40,7 +40,11 @@ class SvelteWP_Data {
         for ($i = 0; $i < count($items); $i++) {
             foreach ($all_items as $item) {
                 if ($items[$i]['page_id'] == $item->post_parent) {
-                    $url = parse_url($item->url)["path"];
+                    $url = $item->url;
+
+                    if (strpos($url, 'http') === 0) {
+                        $url = parse_url($url)["path"];
+                    }
 
                     $items[$i]['items'][] = [
                         'page_id' => $item->object_id,
@@ -74,7 +78,11 @@ class SvelteWP_Data {
                 $parent_id = $mi->post_parent;
             
                 if ($parent_id === 0) {
-                    $url = parse_url($mi->url)["path"];
+                    $url = $mi->url;
+
+                    if (strpos($url, 'http') === 0) {
+                        $url = parse_url($url)["path"];
+                    }
 
                     $items[] = [
                         'page_id' => $mi->object_id,
