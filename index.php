@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: SvelteWP
- * Version:     1.0.4
+ * Version:     1.0.5
  * Author:      Fotki Agency / Dmitri Don
  * Text Domain: sveltewp
  * Domain Path: /languages
