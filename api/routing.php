@@ -11,7 +11,7 @@ class SvelteWP_Data {
         
         global $wpdb;
         
-        $polylang_settings = unserialize($wpdb->get_var("select option_value from wp_options where option_name='polylang'"));
+        $polylang_settings = unserialize($wpdb->get_var("SELECT option_value FROM wp_options WHERE option_name='polylang'"));
         $default_lang = $polylang_settings['default_lang'];
 
         $all_languages = get_terms('language', [
@@ -40,9 +40,11 @@ class SvelteWP_Data {
         for ($i = 0; $i < count($items); $i++) {
             foreach ($all_items as $item) {
                 if ($items[$i]['page_id'] == $item->post_parent) {
+                    $url = (parse_url($item->url))["path"];
+
                     $items[$i]['items'][] = [
                         'page_id' => $item->object_id,
-                        'url' => $item->url,
+                        'url' => $url,
                         'title' => $item->title,
                         'items' => []
                     ];
@@ -72,15 +74,17 @@ class SvelteWP_Data {
                 $parent_id = $mi->post_parent;
             
                 if ($parent_id === 0) {
+                    $url = parse_url($mi->url)["path"];
+
                     $items[] = [
                         'page_id' => $mi->object_id,
-                        'url' => $mi->url,
+                        'url' => $url,
                         'title' => $mi->title,
                         'items' => []
                     ];
                 }
 
-                $url_page_map[$mi->url] = [
+                $url_page_map[$url] = [
                     'page_id' => $mi->object_id
                 ];
             }
