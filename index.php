@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: SvelteWP
- * Version:     1.0.6
+ * Version:     1.0.7
  * Author:      Fotki Agency / Dmitri Don
  * Text Domain: sveltewp
  * Domain Path: /languages
@@ -28,11 +28,9 @@ function get_menu() {
     // return wp_get_nav_menu_items('menu');
 }
 
-add_action('init', function () {
-    header("Access-Control-Allow-Origin: *");
-});
-
 add_action('rest_api_init', function () {
+    header("Access-Control-Allow-Origin: *");
+
     register_rest_route('myroutes', '/menu', [
         'methods' => 'GET',
         'callback' => 'get_menu',
