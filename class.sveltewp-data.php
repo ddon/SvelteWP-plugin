@@ -99,14 +99,14 @@ class SvelteWP_Data {
 
             foreach ($all_menu_items as $mi) {
                 $parent_id = $mi->post_parent;
-            
+
+                $url = $mi->url;
+
+                if (strpos($url, 'http') === 0) {
+                    $url = parse_url($url)['path'];
+                }
+
                 if ($parent_id === 0) {
-                    $url = $mi->url;
-
-                    if (strpos($url, 'http') === 0) {
-                        $url = parse_url($url)['path'];
-                    }
-
                     $items[] = [
                         'page_id' => $mi->object_id,
                         'url' => $url,
@@ -119,7 +119,7 @@ class SvelteWP_Data {
                     'page_id' => intval($mi->object_id)
                 ];
             }
-            
+
             $items = self::get_submenus($items, $all_menu_items);
 
             $menus[] = [
