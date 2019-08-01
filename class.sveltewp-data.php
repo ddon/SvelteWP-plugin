@@ -1,7 +1,27 @@
 <?php
 
+use Symfony\Component\Yaml\Yaml;
+use Symfony\Component\Yaml\Exception\ParseException;
+
 
 class SvelteWP_Data {
+    public static function content_to_yaml($text) {
+        $content = '';
+
+        if (preg_match('|<code>(.*)</code>|s', $text, $matches)) {
+            $yaml = $matches[1];
+
+            try {
+                $content = Yaml::parse($yaml);
+            } catch (ParseException $exception) {
+                error_log($exception->getMessage());
+                $content = '';
+            }
+        }
+
+        return $content;
+    }
+
     public static function get_languages() {
         if (!function_exists('pll_the_languages')) {
             return [];
@@ -11,7 +31,10 @@ class SvelteWP_Data {
         
         global $wpdb;
         
-        $polylang_settings = unserialize($wpdb->get_var("SELECT option_value FROM wp_options WHERE option_name='polylang'"));
+        $polylang_settings = unserialize($wpdb->get_var(
+            "SELECT option_value FROM $wpdb->options WHERE option_name='polylang'"
+        ));
+
         $default_lang = $polylang_settings['default_lang'];
 
         $all_languages = get_terms('language', [
@@ -43,7 +66,7 @@ class SvelteWP_Data {
                     $url = $item->url;
 
                     if (strpos($url, 'http') === 0) {
-                        $url = parse_url($url)["path"];
+                        $url = parse_url($url)['path'];
                     }
 
                     $items[$i]['items'][] = [
@@ -81,7 +104,7 @@ class SvelteWP_Data {
                     $url = $mi->url;
 
                     if (strpos($url, 'http') === 0) {
-                        $url = parse_url($url)["path"];
+                        $url = parse_url($url)['path'];
                     }
 
                     $items[] = [
@@ -93,7 +116,7 @@ class SvelteWP_Data {
                 }
 
                 $url_page_map[$url] = [
-                    'page_id' => $mi->object_id
+                    'page_id' => intval($mi->object_id)
                 ];
             }
             
@@ -111,24 +134,64 @@ class SvelteWP_Data {
             'url_page_map' => $url_page_map
         ];
     }
-}
 
-class SvelteWP_RoutingAPI {
-    public static function get_routing() {
-        $languages = SvelteWP_Data::get_languages();
-        $data = SvelteWP_Data::get_menus_and_map();
+    public static function get_header() {
+        $header = [];
+        $sveltewp_header_page_id = get_option('sveltewp_header_page_id');
 
-        $menus = $data['menus'];
-        $url_page_map = $data['url_page_map'];
+        if (function_exists('pll_get_post_translations') && (!empty($sveltewp_header_page_id))) {
+            $header_translations = pll_get_post_translations($sveltewp_header_page_id);
 
-        return [
-            'ok' => true,
-            'data' => [
-                'menus' => $menus,
-                'languages' => $languages,
-                'url_page_map' => $url_page_map
-            ]
-        ];
+            foreach($header_translations as $l => $page_id) {
+                $p = get_post($page_id);
+                $content = self::content_to_yaml($p->post_content);
+
+                $header['translations'][$l] = [
+                    'id' => $p->ID,
+                    'title' => $p->post_title,
+                    'content' => $content,
+                ];
+            }
+        } else if (!empty($sveltewp_header_page_id)) {
+            $p = get_post($page_id);
+
+            $header = [
+                'id' => $p->ID,
+                'title' => $p->post_title,
+                'content' => $p->post_content,
+            ];
+        }
+
+        return $header;
+    }
+
+    public static function get_footer() {
+        $footer = [];
+        $sveltewp_footer_page_id = get_option('sveltewp_footer_page_id');
+
+        if (function_exists('pll_get_post_translations') && (!empty($sveltewp_footer_page_id))) {
+            $footer_translations = pll_get_post_translations($sveltewp_footer_page_id);
+
+            foreach($footer_translations as $l => $page_id) {
+                $p = get_post($page_id);
+                $content = self::content_to_yaml($p->post_content);
+
+                $footer['translations'][$l] = [
+                    'id' => $p->ID,
+                    'title' => $p->post_title,
+                    'content' => $content,
+                ];
+            }
+        } else if (!empty($sveltewp_footer_page_id)) {
+            $p = get_post($page_id);
+
+            $footer = [
+                'id' => $p->ID,
+                'title' => $p->post_title,
+                'content' => $p->post_content,
+            ];
+        }
+        return $footer;
     }
 }
 
