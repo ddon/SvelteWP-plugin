@@ -6,9 +6,9 @@ use Symfony\Component\Yaml\Exception\ParseException;
 
 class SvelteWP_Data {
     public static function content_to_yaml($text) {
-        $content = '';
+        $content = $text;
 
-        if (preg_match('|<code>(.*)</code>|s', $text, $matches)) {
+        if (preg_match('|<code>(.*)</code>|s', $content, $matches)) {
             $yaml = $matches[1];
 
             try {
@@ -87,46 +87,90 @@ class SvelteWP_Data {
     }
 
     public static function get_menus_and_map() {
-        $nav_menus = wp_get_nav_menus();
+        $menus_needed = get_menus_needed();
 
         $menus = [];
         $url_page_map = [];
 
-        foreach ($nav_menus as $menu) {
-            $all_menu_items = wp_get_nav_menu_items($menu);
+        if (!empty($menus_needed)) {
+            foreach ($menus_needed as $menu_needed) {
+                
+                $menus_in_svelte_settings = [];
 
-            $items = [];
+                if (isset($GLOBALS["polylang"])) {
+                    $all_languages = pll_languages_list();
 
-            foreach ($all_menu_items as $mi) {
-                $parent_id = $mi->post_parent;
+                    if (!empty($all_languages)) {
+                        foreach ($all_languages as $lang) {
+                            $svelte_menu_id = get_option('sveltewp_menu_' . $menu_needed['slug'] . '_' . $lang);
 
-                $url = $mi->url;
+                            if (!empty($svelte_menu_id)) {
+                                $menus_in_svelte_settings[$menu_needed['slug']][] = [
+                                    'menu_id' => $svelte_menu_id,
+                                    'lang' => $lang
+                                ];
+                            }
+                        }
+                    }
+                } else {
+                    $svelte_menu_id = get_option('sveltewp_menu_' . $menu_needed['slug']);
 
-                if (strpos($url, 'http') === 0) {
-                    $url = parse_url($url)['path'];
+                    if (!empty($svelte_menu_id)) {
+                        $menus_in_svelte_settings[$menu_needed['slug']][] = [
+                            'menu_id' => $svelte_menu_id
+                        ];
+                    }
                 }
 
-                if ($parent_id === 0) {
-                    $items[] = [
-                        'page_id' => $mi->object_id,
-                        'url' => $url,
-                        'title' => $mi->title,
-                        'items' => []
-                    ];
-                }
+                if (!empty($menus_in_svelte_settings)) {
 
-                $url_page_map[$url] = [
-                    'page_id' => intval($mi->object_id)
-                ];
+                    foreach ($menus_in_svelte_settings as $menu_needed_slug => $menu_needed_data) {
+                        foreach ($menu_needed_data as $menu_needed_d) {
+                            $menu_info = wp_get_nav_menu_object($menu_needed_d['menu_id']);
+                            $all_menu_items = wp_get_nav_menu_items($menu_needed_d['menu_id']);
+
+                            $items = [];
+
+                            foreach ($all_menu_items as $mi) {
+                                $parent_id = $mi->post_parent;
+
+                                $url = $mi->url;
+
+                                if (strpos($url, 'http') === 0) {
+                                    $url = parse_url($url)['path'];
+                                }
+
+                                if ($parent_id === 0) {
+                                    $items[] = [
+                                        'page_id' => $mi->object_id,
+                                        'url' => $url,
+                                        'title' => $mi->title,
+                                        'items' => []
+                                    ];
+                                }
+
+                                $url_page_map[$url] = [
+                                    'page_id' => intval($mi->object_id)
+                                ];
+                            }
+
+                            $items = self::get_submenus($items, $all_menu_items);
+
+                            if (!empty($menu_needed_d['lang'])) {
+                                $menus[$menu_needed_slug][$menu_needed_d['lang']] = [
+                                    'menu_id' => $menu_info->term_id,
+                                    'items' => $items
+                                ];
+                            } else {
+                                $menus[$menu_needed_slug] = [
+                                    'menu_id' => $menu_info->term_id,
+                                    'items' => $items
+                                ];
+                            }
+                        }
+                    }
+                }
             }
-
-            $items = self::get_submenus($items, $all_menu_items);
-
-            $menus[] = [
-                'menu_id' => $menu->term_id,
-                'slug' => $menu->slug,
-                'items' => $items
-            ];
         }
 
         return [
@@ -153,7 +197,7 @@ class SvelteWP_Data {
                 ];
             }
         } else if (!empty($sveltewp_header_page_id)) {
-            $p = get_post($page_id);
+            $p = get_post($sveltewp_header_page_id);
 
             $header = [
                 'id' => $p->ID,
@@ -183,7 +227,7 @@ class SvelteWP_Data {
                 ];
             }
         } else if (!empty($sveltewp_footer_page_id)) {
-            $p = get_post($page_id);
+            $p = get_post($sveltewp_footer_page_id);
 
             $footer = [
                 'id' => $p->ID,
