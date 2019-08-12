@@ -28,7 +28,6 @@ class SvelteWP_Data {
         }
 
         global $polylang;
-        
         global $wpdb;
         
         $polylang_settings = unserialize($wpdb->get_var(
@@ -94,10 +93,9 @@ class SvelteWP_Data {
 
         if (!empty($menus_needed)) {
             foreach ($menus_needed as $menu_needed) {
-                
                 $menus_in_svelte_settings = [];
 
-                if (isset($GLOBALS["polylang"])) {
+                if (isset($GLOBALS['polylang'])) {
                     $all_languages = pll_languages_list();
 
                     if (!empty($all_languages)) {
@@ -123,7 +121,6 @@ class SvelteWP_Data {
                 }
 
                 if (!empty($menus_in_svelte_settings)) {
-
                     foreach ($menus_in_svelte_settings as $menu_needed_slug => $menu_needed_data) {
                         foreach ($menu_needed_data as $menu_needed_d) {
                             $menu_info = wp_get_nav_menu_object($menu_needed_d['menu_id']);
@@ -236,6 +233,43 @@ class SvelteWP_Data {
             ];
         }
         return $footer;
+    }
+
+    public static function get_first_pages($url_page_map) {
+        if (empty($url_page_map['/'])) {
+            return [];
+        }
+
+        $root_page_id = $url_page_map['/']['page_id'];
+
+        $root_page = get_post($root_page_id);
+
+        if (empty($root_page)) {
+            return;
+        }
+
+        $translations = [];
+
+        if (function_exists('pll_get_post_translations')) {
+            $translations = pll_get_post_translations($root_page->ID);
+        }
+
+        $languages = [];
+
+        foreach ($translations as $lang => $page_id) {
+            if ($page_id === $root_page->ID) {
+                $languages[$lang] = '/';
+            } else {
+                foreach ($url_page_map as $url => $url_data) {
+                    if ($page_id === $url_data['page_id']) {
+                        $languages[$lang] = $url;
+                        break;
+                    }
+                }
+            }
+        }
+
+        return $languages;
     }
 }
 

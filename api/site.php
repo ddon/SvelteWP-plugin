@@ -17,11 +17,30 @@ class SvelteWP_SiteAPI {
         $site_title = get_bloginfo('name');
         $site_description = get_bloginfo('description');
 
+        $custom_logo_url = '';
+
+        if (has_custom_logo()) {
+            $custom_logo_id = get_theme_mod('custom_logo');
+            $logo_meta = wp_get_attachment_image_src($custom_logo_id, 'full');
+            $custom_logo_url = $logo_meta[0];
+        }
+
+        $first_pages = SvelteWP_Data::get_first_pages($url_page_map);
+
+        for ($i = 0; $i < count($languages); $i++) {
+            if (empty($first_pages[$languages[$i]['slug']])) {
+                $languages[$i]['default_url'] = '/';
+            } else {
+                $languages[$i]['default_url'] = $first_pages[$languages[$i]['slug']];
+            }
+        }
+
         return [
             'ok' => true,
             'data' => [
                 'site_title' => $site_title,
                 'site_description' => $site_description,
+                'site_logo' => $custom_logo_url,
                 'menus' => $menus,
                 'languages' => $languages,
                 'url_page_map' => $url_page_map,
