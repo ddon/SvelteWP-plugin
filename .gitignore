@@ -1,2 +1,6 @@
 .history
 vendor
+
+# Visual Code files
+.code-*
+
