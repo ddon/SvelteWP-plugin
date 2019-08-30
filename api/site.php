@@ -45,7 +45,8 @@ class SvelteWP_SiteAPI {
                 'languages' => $languages,
                 'url_page_map' => $url_page_map,
                 'header' => $header,
-                'footer' => $footer
+                'footer' => $footer,
+                'dictionary' => !empty(SvelteWP_Translations::$dictionary) ? SvelteWP_Translations::$dictionary : []
             ]
         ];
     }

@@ -10,6 +10,7 @@
 
 require_once(plugin_dir_path(__FILE__) . 'vendor/autoload.php');
 
+require_once(plugin_dir_path(__FILE__) . 'translations.php');
 require_once(plugin_dir_path(__FILE__) . 'api/site.php');
 require_once(plugin_dir_path(__FILE__) . 'api/page.php');
 
@@ -65,6 +66,17 @@ add_action('init', function () {
         }
     });
 
+    // make cropper flexible for custom logo in theme
+    add_theme_support(
+        'custom-logo',
+        [
+            'width'       => 400,
+            'height'      => 100,
+            'flex-width'  => true,
+            'flex-height' => true,
+        ]
+    );
+
     add_action('admin_menu', function() {
         add_options_page('SvelteWP Settings', 'SvelteWP', 'manage_options', 'sveltewp', function() {
             ?>
@@ -76,8 +88,17 @@ add_action('init', function () {
                     <?php
                         if (isset($GLOBALS["polylang"])) {
                             ?>
-                                Polylang: <span>enabled</span>
+                                <div>Polylang: <span>enabled</span></div>
+                                <div>Active languages: 
                             <?php
+
+                            $active_languages = pll_languages_list();
+
+                            if (!empty($active_languages)) {
+                                echo implode(" | ", $active_languages);
+                            }
+
+                            echo '</div>';
                         } else {
                             ?>
                                 We support Polylang multilingual plugin. If you need multilanguage website please install it.
@@ -212,23 +233,24 @@ add_action('init', function () {
                             $menus_needed = get_menus_needed();
                     ?>
 
-                    <table class="wp-list-table widefat fixed striped languages" style="max-width: 700px">
+                    <table class="wp-list-table widefat fixed striped languages" style="max-width: <?= (isset($GLOBALS["polylang"])) ? '1000' : '700' ?>px">
                         <thead>
                             <tr>
-                                <th scope="col" class="manage-column">Menu</th>
+                                <th scope="col" class="manage-column" style="width: 4em">Menu</th>
                                 <?php
                                     if (!empty($all_languages)) {
                                         foreach ($all_languages as $lang) {
                                             ?>
-                                            <th scope="col" class="manage-column"><?= $lang ?></th>
+                                            <th scope="col" class="manage-column" style="width: 12em"><?= $lang ?></th>
                                             <?php
                                         }
                                     } else {
                                         ?>
-                                            <th scope="col" class="manage-column"></th>
+                                            <th scope="col" class="manage-column" style="width: 12em"></th>
                                         <?php
                                     }
                                 ?>
+                                <th scope="col" class="manage-column" style="width: 16em">Settings</th>
                             </tr>
                         </thead>
                         <tbody id="the-list">
@@ -244,7 +266,7 @@ add_action('init', function () {
                                             $sveltewp_key = 'sveltewp_menu_' . $menu_needed['slug'] . '_' . $lang;
                                             $sveltewp_menu_id = get_option($sveltewp_key);
                                             ?>
-                                            <th scope="col" class="manage-column">
+                                            <td scope="col" class="manage-column">
                                                 <select name="<?= $sveltewp_key ?>" autocomplete="off">
                                                     <option value="">None</option>
                                                     <?php
@@ -255,14 +277,14 @@ add_action('init', function () {
                                                         }
                                                     ?>
                                                 </select>
-                                            </th>
+                                            </td>
                                             <?php
                                         }
                                     } else {
                                         $sveltewp_key = 'sveltewp_menu_' . $menu_needed['slug'];
                                         $sveltewp_menu_id = get_option($sveltewp_key);
                                         ?>
-                                        <th scope="col" class="manage-column">
+                                        <td scope="col" class="manage-column">
                                             <select name="<?= $sveltewp_key ?>" autocomplete="off">
                                                 <option value="">None</option>
                                                 <?php
@@ -273,10 +295,17 @@ add_action('init', function () {
                                                     }
                                                 ?>
                                             </select>
-                                        </th>
+                                        </td>
                                         <?php
                                     }
                                 ?>
+                                <td>
+                                    <p><label><input type="checkbox" name="dropdown" value="">Displays as a dropdown</label></p>
+                                    <p><label><input type="checkbox" name="show_names" value="">Displays language names</label></p>
+                                    <p><label><input type="checkbox" name="show_flags" value="">Displays flags</label></p>
+                                    <p><label><input type="checkbox" name="hide_if_current_lang" value="">Hides the current language</label></p>
+                                    <p><label><input type="checkbox" name="hide_if_no_translation" value="">Hides languages with no translation</label></p>
+                                </td>
                             </tr>
                             <?php
                         }
