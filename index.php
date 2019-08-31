@@ -54,6 +54,12 @@ add_action('init', function () {
                     if (!empty($all_languages)) {
                         foreach ($all_languages as $lang) {
                             register_setting('sveltewp_options_group', 'sveltewp_menu_' . $menu_needed['slug'] . '_' . $lang);
+                            
+                            register_setting('sveltewp_options_group', 'sveltewp_lng_swtchr_' . $menu_needed['slug'] . '_as_dropdown');
+                            register_setting('sveltewp_options_group', 'sveltewp_lng_swtchr_' . $menu_needed['slug'] . '_show_names');
+                            register_setting('sveltewp_options_group', 'sveltewp_lng_swtchr_' . $menu_needed['slug'] . '_show_flags');
+                            register_setting('sveltewp_options_group', 'sveltewp_lng_swtchr_' . $menu_needed['slug'] . '_hide_if_current_lang');
+                            register_setting('sveltewp_options_group', 'sveltewp_lng_swtchr_' . $menu_needed['slug'] . '_hide_if_no_translation');
                         }
                     }
                 } else {
@@ -184,7 +190,7 @@ add_action('init', function () {
 
                 ?>
 
-                <h3>Header & Footer:</h3>
+                <h3>Header & Footer content:</h3>
 
                 <table class="wp-list-table widefat fixed striped languages" style="max-width: 700px">
                     <thead>
@@ -312,13 +318,27 @@ add_action('init', function () {
                             ?>
                             <?php
                             if (isset($GLOBALS["polylang"])) {
+                                $sw_settings_as_dropdown_key = 'sveltewp_lng_swtchr_' . $menu_needed['slug'] . '_as_dropdown';
+                                $sw_settings_as_dropdown = get_option($sw_settings_as_dropdown_key);
+
+                                $sw_settings_show_names_key = 'sveltewp_lng_swtchr_' . $menu_needed['slug'] . '_show_names';
+                                $sw_settings_show_names = get_option($sw_settings_show_names_key);
+
+                                $sw_settings_show_flags_key = 'sveltewp_lng_swtchr_' . $menu_needed['slug'] . '_show_flags';
+                                $sw_settings_show_flags = get_option($sw_settings_show_flags_key);
+
+                                $sw_settings_hide_if_current_lang_key = 'sveltewp_lng_swtchr_' . $menu_needed['slug'] . '_hide_if_current_lang';
+                                $sw_settings_hide_if_current_lang = get_option($sw_settings_hide_if_current_lang_key);
+
+                                $sw_settings_hide_if_no_translation_key = 'sveltewp_lng_swtchr_' . $menu_needed['slug'] . '_hide_if_no_translation';
+                                $sw_settings_hide_if_no_translation = get_option($sw_settings_hide_if_no_translation_key);
                             ?>
                             <td>
-                                <p><label><input type="checkbox" name="dropdown" value="">Displays as a dropdown</label></p>
-                                <p><label><input type="checkbox" name="show_names" value="">Displays language names</label></p>
-                                <p><label><input type="checkbox" name="show_flags" value="">Displays flags</label></p>
-                                <p><label><input type="checkbox" name="hide_if_current_lang" value="">Hides the current language</label></p>
-                                <p><label><input type="checkbox" name="hide_if_no_translation" value="">Hides languages with no translation</label></p>
+                                <p><label><input type="checkbox" autocomplete="off" name="<?= $sw_settings_as_dropdown_key ?>" <?= !empty($sw_settings_as_dropdown) ? ' checked' : ''; ?>>Displays as a dropdown</label></p>
+                                <p><label><input type="checkbox" autocomplete="off" name="<?= $sw_settings_show_names_key ?>" <?= !empty($sw_settings_show_names) ? ' checked' : ''; ?>>Displays language names</label></p>
+                                <p><label><input type="checkbox" autocomplete="off" name="<?= $sw_settings_show_flags_key ?>" <?= !empty($sw_settings_show_flags) ? ' checked' : ''; ?>>Displays flags</label></p>
+                                <p><label><input type="checkbox" autocomplete="off" name="<?= $sw_settings_hide_if_current_lang_key ?>" <?= !empty($sw_settings_hide_if_current_lang) ? ' checked' : ''; ?>>Hides the current language</label></p>
+                                <p><label><input type="checkbox" autocomplete="off" name="<?= $sw_settings_hide_if_no_translation_key ?>" <?= !empty($sw_settings_hide_if_no_translation) ? ' checked' : ''; ?>>Hides languages with no translation</label></p>
                             </td>
                             <?php
                             }
