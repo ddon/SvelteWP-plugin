@@ -46,7 +46,10 @@ class SvelteWP_SiteAPI {
                 'url_page_map' => $url_page_map,
                 'header' => $header,
                 'footer' => $footer,
-                'dictionary' => !empty(SvelteWP_Translations::$dictionary) ? SvelteWP_Translations::$dictionary : []
+                'dictionary' => !empty(SvelteWP_Translations::$dictionary) ? SvelteWP_Translations::$dictionary : [],
+                'common_settings' => [
+                    'mouse_over_menu' => !empty(get_option('sveltewp_mouse_over_menu')) ? true : false
+                ],
             ]
         ];
     }
