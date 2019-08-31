@@ -1,0 +1,6 @@
+{
+    "require": {
+        "pubnub/pubnub": "~4.1.3",
+        "symfony/yaml": "^4.3"
+    }
+}
