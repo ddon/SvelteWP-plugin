@@ -46,20 +46,11 @@ class SvelteWP_SiteAPI {
 
                     if (!empty($all_languages)) {
                         foreach ($all_languages as $lang) {
-                            $sw_settings_as_dropdown_key = 'sveltewp_lng_swtchr_' . $menu_needed['slug'] . '_as_dropdown';
-                            $sw_settings_as_dropdown = get_option($sw_settings_as_dropdown_key);
-
-                            $sw_settings_show_names_key = 'sveltewp_lng_swtchr_' . $menu_needed['slug'] . '_show_names';
-                            $sw_settings_show_names = get_option($sw_settings_show_names_key);
-
-                            $sw_settings_show_flags_key = 'sveltewp_lng_swtchr_' . $menu_needed['slug'] . '_show_flags';
-                            $sw_settings_show_flags = get_option($sw_settings_show_flags_key);
-
-                            $sw_settings_hide_if_current_lang_key = 'sveltewp_lng_swtchr_' . $menu_needed['slug'] . '_hide_if_current_lang';
-                            $sw_settings_hide_if_current_lang = get_option($sw_settings_hide_if_current_lang_key);
-
-                            $sw_settings_hide_if_no_translation_key = 'sveltewp_lng_swtchr_' . $menu_needed['slug'] . '_hide_if_no_translation';
-                            $sw_settings_hide_if_no_translation = get_option($sw_settings_hide_if_no_translation_key);
+                            $sw_settings_as_dropdown = get_option('sveltewp_lng_swtchr_' . $menu_needed['slug'] . '_as_dropdown');
+                            $sw_settings_show_names = get_option('sveltewp_lng_swtchr_' . $menu_needed['slug'] . '_show_names');
+                            $sw_settings_show_flags = get_option('sveltewp_lng_swtchr_' . $menu_needed['slug'] . '_show_flags');
+                            $sw_settings_hide_if_current_lang = get_option('sveltewp_lng_swtchr_' . $menu_needed['slug'] . '_hide_if_current_lang');
+                            $sw_settings_hide_if_no_translation = get_option('sveltewp_lng_swtchr_' . $menu_needed['slug'] . '_hide_if_no_translation');
 
                             $lang_switcher_settings[$menu_needed['slug']] = [
                                 'as_dropdown' => !empty($sw_settings_as_dropdown) ? true : false,
@@ -68,6 +59,26 @@ class SvelteWP_SiteAPI {
                                 'hide_if_current_lang' => !empty($sw_settings_hide_if_current_lang) ? true : false,
                                 'hide_if_no_translation' => !empty($sw_settings_hide_if_no_translation) ? true : false,
                             ];
+                        }
+                    }
+                }
+            }
+        }
+
+        $cached_pages = [];
+
+        $cached_pages_ids = get_option('sveltewp_cached_pages_ids');
+
+        if (!empty($cached_pages_ids)) {
+            foreach ($cached_pages_ids as $cached_page_id) {
+                $cached_pages[$cached_page_id] = SvelteWP_PageAPI::get_page_data($cached_page_id);
+
+                if (isset($GLOBALS["polylang"])) {
+                    $translations = $GLOBALS["polylang"]->model->post->get_translations($cached_page_id);
+
+                    if (!empty($translations)) {
+                        foreach ($translations as $lang => $translation_page_id) {
+                            $cached_pages[$translation_page_id] = SvelteWP_PageAPI::get_page_data($translation_page_id);
                         }
                     }
                 }
@@ -92,6 +103,11 @@ class SvelteWP_SiteAPI {
                 'common_settings' => [
                     'mouse_over_menu' => !empty(get_option('sveltewp_mouse_over_menu')) ? true : false
                 ],
+                'pubnub' => [
+                    'publish_key' => get_option('sveltewp_publish_key') ?? '',
+                    'subscribe_key' => get_option('sveltewp_subscribe_key') ?? ''
+                ],
+                'cached_pages' => $cached_pages
             ]
         ];
     }

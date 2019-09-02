@@ -43,6 +43,7 @@ add_action('init', function () {
         register_setting('sveltewp_options_group', 'sveltewp_header_page_id');
         register_setting('sveltewp_options_group', 'sveltewp_footer_page_id');
         register_setting('sveltewp_options_group', 'sveltewp_mouse_over_menu');
+        register_setting('sveltewp_options_group', 'sveltewp_cached_pages_ids');
 
         $menus_needed = get_menus_needed();
 
@@ -356,6 +357,57 @@ add_action('init', function () {
                         echo 'No menus found.';
                     }
                 ?>
+
+
+                <h3>Cache for pages:</h3>
+
+                <table class="wp-list-table widefat fixed striped languages" style="max-width: 700px">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="manage-column" style="width: 3.5em; text-align: center"></th>
+                            <th scope="col" class="manage-column">Page</th>
+                            <?php
+                                if (!empty($all_languages)) {
+                                    foreach ($all_languages as $lang) {
+                                        ?>
+                                        <th scope="col" class="manage-column" style="width: 2em"><?= $lang ?></th>
+                                        <?php
+                                    }
+                                }
+                            ?>
+                        </tr>
+                    </thead>
+                    <tbody id="the-list">
+
+                <?php
+                    $cached_pages_ids = get_option('sveltewp_cached_pages_ids');
+
+                    if (empty($cached_pages_ids)) {
+                        $cached_pages_ids = [];
+                    }
+
+                    foreach ($pages_grouped as $group_page_id => $group_page_data) {
+                        ?>
+                        <tr>
+                            <td style="text-align:center"><input type="checkbox" name="sveltewp_cached_pages_ids[]" value="<?= $group_page_id ?>"<?= in_array($group_page_id, $cached_pages_ids) ? ' checked' : ''; ?> autocomplete="off"></td>
+                            <td><?= $group_page_data['title'] ?></td>
+                            <?php
+                                if (!empty($all_languages)) {
+                                    foreach ($all_languages as $lang) {
+                                        ?>
+                                        <th scope="col" class="manage-column"><?= !empty($group_page_data['languages'][$lang]) ? '<span class="pll_icon_tick" title="' . $group_page_data['languages'][$lang] . '"></span>' : '—' ?></th>
+                                        <?php
+                                    }
+                                }
+                            ?>
+                        </tr>
+                        <?php
+                    }
+                ?>
+
+                    </tbody>
+                </table>
+
 
                 <h3>PubNub:</h3>
                 <p>For real-time content update, you need to subscribe to <a href='https://www.pubnub.com/'>PubNub</a> account and paste your keys here.</p>
