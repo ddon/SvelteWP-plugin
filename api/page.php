@@ -42,5 +42,50 @@ class SvelteWP_PageAPI {
             'translations' => $translations
         ];
     }
+
+    public static function get_precached_pages($data) {
+        $lang_param = $data['lang'];
+
+        $cached_pages = [];
+
+        $cached_pages_ids = get_option('sveltewp_cached_pages_ids');
+
+        if (empty($cached_pages_ids)) {
+            return [
+                'ok' => true,
+                'data' => $cached_pages
+            ];
+        }
+
+        if (isset($GLOBALS["polylang"]) && !empty($lang_param)) {
+            foreach ($cached_pages_ids as $cached_page_id) {
+                $post_lang = pll_get_post_language($cached_page_id, 'slug');
+
+                if ($post_lang === $lang_param)  {
+                    $cached_pages[$cached_page_id] = SvelteWP_PageAPI::get_page_data($cached_page_id);
+                    continue;
+                }
+
+                $translations = $GLOBALS["polylang"]->model->post->get_translations($cached_page_id);
+
+                if (!empty($translations)) {
+                    foreach ($translations as $translation_post_lang => $translation_page_id) {
+                        if ($translation_post_lang === $lang_param)  {
+                            $cached_pages[$translation_page_id] = SvelteWP_PageAPI::get_page_data($translation_page_id);
+                        }
+                    }
+                }
+            }
+        } else {
+            foreach ($cached_pages_ids as $cached_page_id) {
+                $cached_pages[$cached_page_id] = SvelteWP_PageAPI::get_page_data($cached_page_id);
+            }
+        }
+
+        return [
+            'ok' => true,
+            'data' => $cached_pages
+        ];
+    }
 }
 

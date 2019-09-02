@@ -33,6 +33,11 @@ add_action('rest_api_init', function () {
         'methods' => WP_REST_Server::READABLE,
         'callback' => ['SvelteWP_PageAPI', 'get_page']
     ]);
+
+    register_rest_route('svelte-wp/v1', '/precached_pages(?:/(?P<lang>[a-z]{2}))?', [
+        'methods' => WP_REST_Server::READABLE,
+        'callback' => ['SvelteWP_PageAPI', 'get_precached_pages']
+    ]);
 });
 
 
@@ -136,6 +141,7 @@ add_action('init', function () {
                 ];
 
                 if (isset($GLOBALS["polylang"])) {
+                    // show all pages on all on all languages
                     $get_pages_args['lang'] = '';
                 }
 
@@ -359,7 +365,7 @@ add_action('init', function () {
                 ?>
 
 
-                <h3>Cache for pages:</h3>
+                <h3>Cached pages:</h3>
 
                 <table class="wp-list-table widefat fixed striped languages" style="max-width: 700px">
                     <thead>

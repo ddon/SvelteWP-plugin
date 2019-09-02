@@ -65,26 +65,6 @@ class SvelteWP_SiteAPI {
             }
         }
 
-        $cached_pages = [];
-
-        $cached_pages_ids = get_option('sveltewp_cached_pages_ids');
-
-        if (!empty($cached_pages_ids)) {
-            foreach ($cached_pages_ids as $cached_page_id) {
-                $cached_pages[$cached_page_id] = SvelteWP_PageAPI::get_page_data($cached_page_id);
-
-                if (isset($GLOBALS["polylang"])) {
-                    $translations = $GLOBALS["polylang"]->model->post->get_translations($cached_page_id);
-
-                    if (!empty($translations)) {
-                        foreach ($translations as $lang => $translation_page_id) {
-                            $cached_pages[$translation_page_id] = SvelteWP_PageAPI::get_page_data($translation_page_id);
-                        }
-                    }
-                }
-            }
-        }
-
         return [
             'ok' => true,
             'data' => [
@@ -106,8 +86,7 @@ class SvelteWP_SiteAPI {
                 'pubnub' => [
                     'publish_key' => get_option('sveltewp_publish_key') ?? '',
                     'subscribe_key' => get_option('sveltewp_subscribe_key') ?? ''
-                ],
-                'cached_pages' => $cached_pages
+                ]
             ]
         ];
     }
