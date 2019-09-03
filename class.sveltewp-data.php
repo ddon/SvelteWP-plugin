@@ -311,7 +311,7 @@ class SvelteWP_Data
         $content = SvelteWP_Data::content_to_yaml($page->post_content);
 
         return [
-            'page_id' => $page_id,
+            'page_id' => (int)$page_id,
             'title' => $page->post_title,
             'type' => $page->post_type,
             'content' => $content,
