@@ -51,24 +51,28 @@ add_action('init', function () {
         register_setting('sveltewp_options_group', 'sveltewp_cached_pages_ids');
 
         $menus_needed = get_menus_needed();
-
+        
         if (!empty($menus_needed)) {
-            foreach ($menus_needed as $menu_needed) {
-                if (isset($GLOBALS["polylang"])) {
-                    $all_languages = pll_languages_list();
+            if (isset($GLOBALS["polylang"])) {
+                $active_languages = pll_languages_list();
 
-                    if (!empty($all_languages)) {
-                        foreach ($all_languages as $lang) {
+                if (!empty($active_languages)) {
+                    foreach ($menus_needed as $menu_needed) {
+                        // options for each menu type (header, footer, etc)
+                        register_setting('sveltewp_options_group', 'sveltewp_lng_swtchr_' . $menu_needed['slug'] . '_as_dropdown');
+                        register_setting('sveltewp_options_group', 'sveltewp_lng_swtchr_' . $menu_needed['slug'] . '_show_names');
+                        register_setting('sveltewp_options_group', 'sveltewp_lng_swtchr_' . $menu_needed['slug'] . '_show_flags');
+                        register_setting('sveltewp_options_group', 'sveltewp_lng_swtchr_' . $menu_needed['slug'] . '_hide_if_current_lang');
+                        register_setting('sveltewp_options_group', 'sveltewp_lng_swtchr_' . $menu_needed['slug'] . '_hide_if_no_translation');
+
+                        foreach ($active_languages as $lang) {
+                            // page_id option for each menu type
                             register_setting('sveltewp_options_group', 'sveltewp_menu_' . $menu_needed['slug'] . '_' . $lang);
-                            
-                            register_setting('sveltewp_options_group', 'sveltewp_lng_swtchr_' . $menu_needed['slug'] . '_as_dropdown');
-                            register_setting('sveltewp_options_group', 'sveltewp_lng_swtchr_' . $menu_needed['slug'] . '_show_names');
-                            register_setting('sveltewp_options_group', 'sveltewp_lng_swtchr_' . $menu_needed['slug'] . '_show_flags');
-                            register_setting('sveltewp_options_group', 'sveltewp_lng_swtchr_' . $menu_needed['slug'] . '_hide_if_current_lang');
-                            register_setting('sveltewp_options_group', 'sveltewp_lng_swtchr_' . $menu_needed['slug'] . '_hide_if_no_translation');
                         }
                     }
-                } else {
+                }
+            } else {
+                foreach ($menus_needed as $menu_needed) {
                     register_setting('sveltewp_options_group', 'sveltewp_menu_' . $menu_needed['slug']);
                 }
             }
@@ -88,6 +92,19 @@ add_action('init', function () {
 
     add_action('admin_menu', function() {
         add_options_page('SvelteWP Settings', 'SvelteWP', 'manage_options', 'sveltewp', function() {
+            $active_languages = [];
+            $languages_info = [];
+
+            if (isset($GLOBALS["polylang"])) {
+                $active_languages = pll_languages_list();
+
+                if (!empty($active_languages)) {
+                    foreach ($active_languages as $active_lang) {
+                        $languages_info[$active_lang] = PLL()->model->get_language($active_lang);
+                    }
+                }
+            }
+
             ?>
             <div>
                 <form method="post" action="options.php">
@@ -104,10 +121,14 @@ add_action('init', function () {
                             <div>Active languages: 
                         <?php
 
-                        $active_languages = pll_languages_list();
-
                         if (!empty($active_languages)) {
-                            echo implode(" | ", $active_languages);
+                            foreach ($active_languages as $active_lang) {
+                                if (!empty($languages_info[$active_lang]->flag)) {
+                                    echo $languages_info[$active_lang]->flag . ' ';
+                                } else {
+                                    echo $languages_info[$active_lang]->name . ' ';
+                                }
+                            }
                         }
 
                         echo '</div>';
@@ -148,12 +169,10 @@ add_action('init', function () {
                 $pages = new WP_Query($get_pages_args);
 
                 $pages_grouped = [];
-                $all_languages = [];
 
                 if ($pages->have_posts()) {
 
                     if (isset($GLOBALS["polylang"])) {
-                        $all_languages = pll_languages_list();
                         $current_language = pll_current_language();
 
                         $pages_formatted = [];
@@ -206,10 +225,10 @@ add_action('init', function () {
                             <th scope="col" class="manage-column" style="width: 3.5em; text-align: center">Footer</th>
                             <th scope="col" class="manage-column">Page</th>
                             <?php
-                                if (!empty($all_languages)) {
-                                    foreach ($all_languages as $lang) {
+                                if (!empty($active_languages)) {
+                                    foreach ($active_languages as $lang) {
                                         ?>
-                                        <th scope="col" class="manage-column" style="width: 2em"><?= $lang ?></th>
+                                        <th scope="col" class="manage-column" style="width: 2em"><?= !empty($languages_info[$lang]->flag) ? $languages_info[$lang]->flag : $languages_info[$lang]->name ?></th>
                                         <?php
                                     }
                                 }
@@ -232,8 +251,8 @@ add_action('init', function () {
                             <td style="text-align:center"><input type="radio" name="sveltewp_footer_page_id" value="<?= $group_page_id ?>"<?= $footer_checked ?> autocomplete="off"></td>
                             <td><?= $group_page_data['title'] ?></td>
                             <?php
-                                if (!empty($all_languages)) {
-                                    foreach ($all_languages as $lang) {
+                                if (!empty($active_languages)) {
+                                    foreach ($active_languages as $lang) {
                                         ?>
                                         <th scope="col" class="manage-column"><?= !empty($group_page_data['languages'][$lang]) ? '<span class="pll_icon_tick" title="' . $group_page_data['languages'][$lang] . '"></span>' : '—' ?></th>
                                         <?php
@@ -262,10 +281,10 @@ add_action('init', function () {
                         <tr>
                             <th scope="col" class="manage-column" style="width: 4em">Menu</th>
                             <?php
-                                if (!empty($all_languages)) {
-                                    foreach ($all_languages as $lang) {
+                                if (!empty($active_languages)) {
+                                    foreach ($active_languages as $lang) {
                                         ?>
-                                        <th scope="col" class="manage-column" style="width: 12em"><?= $lang ?></th>
+                                        <th scope="col" class="manage-column" style="width: 12em"><?= !empty($languages_info[$lang]->flag) ? $languages_info[$lang]->flag : $languages_info[$lang]->name ?></th>
                                         <?php
                                     }
                                 } else {
@@ -285,8 +304,8 @@ add_action('init', function () {
                         <tr>
                             <td><?= $menu_needed['name'] ?></td>
                             <?php
-                                if (!empty($all_languages)) {
-                                    foreach ($all_languages as $lang) {
+                                if (!empty($active_languages)) {
+                                    foreach ($active_languages as $lang) {
                                         $sveltewp_key = 'sveltewp_menu_' . $menu_needed['slug'] . '_' . $lang;
                                         $sveltewp_menu_id = get_option($sveltewp_key);
                                         ?>
@@ -373,10 +392,10 @@ add_action('init', function () {
                             <th scope="col" class="manage-column" style="width: 3.5em; text-align: center"></th>
                             <th scope="col" class="manage-column">Page</th>
                             <?php
-                                if (!empty($all_languages)) {
-                                    foreach ($all_languages as $lang) {
+                                if (!empty($active_languages)) {
+                                    foreach ($active_languages as $lang) {
                                         ?>
-                                        <th scope="col" class="manage-column" style="width: 2em"><?= $lang ?></th>
+                                        <th scope="col" class="manage-column" style="width: 2em"><?= !empty($languages_info[$lang]->flag) ? $languages_info[$lang]->flag : $languages_info[$lang]->name ?></th>
                                         <?php
                                     }
                                 }
@@ -398,8 +417,8 @@ add_action('init', function () {
                             <td style="text-align:center"><input type="checkbox" name="sveltewp_cached_pages_ids[]" value="<?= $group_page_id ?>"<?= in_array($group_page_id, $cached_pages_ids) ? ' checked' : ''; ?> autocomplete="off"></td>
                             <td><?= $group_page_data['title'] ?></td>
                             <?php
-                                if (!empty($all_languages)) {
-                                    foreach ($all_languages as $lang) {
+                                if (!empty($active_languages)) {
+                                    foreach ($active_languages as $lang) {
                                         ?>
                                         <th scope="col" class="manage-column"><?= !empty($group_page_data['languages'][$lang]) ? '<span class="pll_icon_tick" title="' . $group_page_data['languages'][$lang] . '"></span>' : '—' ?></th>
                                         <?php
