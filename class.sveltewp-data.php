@@ -61,19 +61,27 @@ class SvelteWP_Data
         return $languages;
     }
 
-    public static function get_submenus($items, $all_items)
+    public static function get_submenus($items, $all_items, $loop = 0)
     {
+        if ($loop > 50) {
+            error_log('Antiloop works. get_submenus stopped.');
+            return [];
+        }
+
         for ($i = 0; $i < count($items); $i++) {
             foreach ($all_items as $item) {
-                if ($items[$i]['page_id'] == $item->post_parent) {
+                if ($items[$i]['id'] === (int)$item->menu_item_parent) {
                     $url = $item->url;
 
                     if (strpos($url, 'http') === 0) {
-                        $url = parse_url($url)['path'];
+                        if (!empty(parse_url($url)['path'])) {
+                            $url = parse_url($url)['path'];
+                        }
                     }
 
                     $items[$i]['items'][] = [
-                        'page_id' => $item->object_id,
+                        'id' => $item->ID,
+                        'page_id' => (int)$item->object_id,
                         'url' => $url,
                         'title' => $item->title,
                         'items' => []
@@ -82,7 +90,7 @@ class SvelteWP_Data
             }
     
             if (!empty($items[$i]['items'])) {
-                $items[$i]['items'] = self::get_submenus($items[$i]['items'], $all_items);
+                $items[$i]['items'] = self::get_submenus($items[$i]['items'], $all_items, $loop++);
             }
         }
     
@@ -134,17 +142,21 @@ class SvelteWP_Data
                             $items = [];
 
                             foreach ($all_menu_items as $mi) {
-                                $parent_id = $mi->post_parent;
+
+                                $menu_item_parent = $mi->menu_item_parent;
 
                                 $url = $mi->url;
 
                                 if (strpos($url, 'http') === 0) {
-                                    $url = parse_url($url)['path'];
+                                    if (!empty(parse_url($url)['path'])) {
+                                        $url = parse_url($url)['path'];
+                                    }
                                 }
 
-                                if ($parent_id === 0) {
+                                if ((int)$menu_item_parent === 0) {
                                     $items[] = [
-                                        'page_id' => $mi->object_id,
+                                        'id' => $mi->ID,
+                                        'page_id' => (int)$mi->object_id,
                                         'url' => $url,
                                         'title' => $mi->title,
                                         'items' => []
