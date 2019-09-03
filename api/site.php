@@ -3,8 +3,10 @@
 require_once(plugin_dir_path(__FILE__) . '../class.sveltewp-data.php');
 
 
-class SvelteWP_SiteAPI {
-    public static function get_init() {
+class SvelteWP_SiteAPI
+{
+    public static function get_init()
+    {
         $languages = SvelteWP_Data::get_languages();
         $data = SvelteWP_Data::get_menus_and_map();
 

@@ -4,8 +4,10 @@ use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\Yaml\Exception\ParseException;
 
 
-class SvelteWP_Data {
-    public static function content_to_yaml($text) {
+class SvelteWP_Data
+{
+    public static function content_to_yaml($text)
+    {
         $content = $text;
 
         if (preg_match('|<code>(.*)</code>|s', $content, $matches)) {
@@ -22,7 +24,8 @@ class SvelteWP_Data {
         return $content;
     }
 
-    public static function get_languages() {
+    public static function get_languages()
+    {
         if (!function_exists('pll_the_languages')) {
             return [];
         }
@@ -58,7 +61,8 @@ class SvelteWP_Data {
         return $languages;
     }
 
-    public static function get_submenus($items, $all_items) {
+    public static function get_submenus($items, $all_items)
+    {
         for ($i = 0; $i < count($items); $i++) {
             foreach ($all_items as $item) {
                 if ($items[$i]['page_id'] == $item->post_parent) {
@@ -85,7 +89,8 @@ class SvelteWP_Data {
         return $items;
     }
 
-    public static function get_menus_and_map() {
+    public static function get_menus_and_map()
+    {
         $menus_needed = get_menus_needed();
 
         $menus = [];
@@ -176,7 +181,8 @@ class SvelteWP_Data {
         ];
     }
 
-    public static function get_header() {
+    public static function get_header()
+    {
         $header = [];
         $sveltewp_header_page_id = get_option('sveltewp_header_page_id');
 
@@ -206,7 +212,8 @@ class SvelteWP_Data {
         return $header;
     }
 
-    public static function get_footer() {
+    public static function get_footer()
+    {
         $footer = [];
         $sveltewp_footer_page_id = get_option('sveltewp_footer_page_id');
 
@@ -235,7 +242,8 @@ class SvelteWP_Data {
         return $footer;
     }
 
-    public static function get_first_pages($url_page_map) {
+    public static function get_first_pages($url_page_map)
+    {
         if (empty($url_page_map['/'])) {
             return [];
         }
@@ -270,6 +278,37 @@ class SvelteWP_Data {
         }
 
         return $languages;
+    }
+
+    public static function get_page_data($page_id)
+    {
+        $page = get_post($page_id);
+
+        if (function_exists('pll_get_post_language')) {
+            $language = pll_get_post_language($page_id);
+        } else {
+            $language = '';
+        }
+
+        if (function_exists('pll_get_post_translations')) {
+            $translations = pll_get_post_translations($page_id);
+        } else {
+            $translations = [];
+        }
+
+        $content = SvelteWP_Data::content_to_yaml($page->post_content);
+
+        return [
+            'page_id' => $page_id,
+            'title' => $page->post_title,
+            'type' => $page->post_type,
+            'content' => $content,
+            'date' => $page->post_date,
+            'modified' => $page->post_modified,
+            'slug' => $page->slug,
+            'language' => $language,
+            'translations' => $translations
+        ];
     }
 }
 
