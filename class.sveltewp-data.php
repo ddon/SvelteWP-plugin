@@ -15,6 +15,21 @@ class SvelteWP_Data
 
             try {
                 $content = Yaml::parse($yaml);
+
+                if (!empty($content)) {
+                    if (is_array($content)) {
+                        array_walk_recursive(
+                            $content,
+                            function (&$value) {
+                                $value = str_replace("\n\n", "<p></p>", $value);
+                                $value = str_replace("\n", "<br/>", $value);
+                            }
+                        );
+                    } elseif (is_string($content)) {
+                        $content = str_replace("\n\n", "<p></p>", $content);
+                        $content = str_replace("\n", "<br/>", $content);
+                    }
+                }
             } catch (ParseException $exception) {
                 error_log($exception->getMessage());
                 $content = '';
@@ -308,7 +323,7 @@ class SvelteWP_Data
             $translations = [];
         }
 
-        $content = SvelteWP_Data::content_to_yaml($page->post_content);
+        $content = self::content_to_yaml($page->post_content);
 
         return [
             'page_id' => (int)$page_id,
