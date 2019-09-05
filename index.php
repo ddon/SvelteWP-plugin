@@ -34,7 +34,7 @@ add_action('rest_api_init', function () {
         'callback' => ['SvelteWP_PageAPI', 'get_page']
     ]);
 
-    register_rest_route('svelte-wp/v1', '/precached_pages(?:/(?P<lang>[a-z]{2}))?', [
+    register_rest_route('svelte-wp/v1', '/precached-pages(?:/(?P<lang>[a-z]{2}))?', [
         'methods' => WP_REST_Server::READABLE,
         'callback' => ['SvelteWP_PageAPI', 'get_precached_pages']
     ]);
@@ -477,6 +477,7 @@ add_action('init', function () {
         return;
     }, 1);
 });
+
 
 function get_menus_needed()
 {
