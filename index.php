@@ -13,6 +13,7 @@ require_once(plugin_dir_path(__FILE__) . 'vendor/autoload.php');
 require_once(plugin_dir_path(__FILE__) . 'translations.php');
 require_once(plugin_dir_path(__FILE__) . 'api/site.php');
 require_once(plugin_dir_path(__FILE__) . 'api/page.php');
+require_once(plugin_dir_path(__FILE__) . 'api/posts.php');
 
 
 use PubNub\PNConfiguration;
@@ -37,6 +38,11 @@ add_action('rest_api_init', function () {
     register_rest_route('svelte-wp/v1', '/precached-pages(?:/(?P<lang>[a-z]{2}))?', [
         'methods' => WP_REST_Server::READABLE,
         'callback' => ['SvelteWP_PageAPI', 'get_precached_pages']
+    ]);
+
+    register_rest_route('svelte-wp/v1', '/posts(?:/(?P<first_param>.+))?', [
+        'methods' => WP_REST_Server::READABLE,
+        'callback' => ['SvelteWP_PostsAPI', 'get_posts']
     ]);
 });
 
