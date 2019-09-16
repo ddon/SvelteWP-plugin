@@ -82,9 +82,6 @@ class SvelteWP_SiteAPI
                 'header' => $header,
                 'footer' => $footer,
                 'dictionary' => !empty(SvelteWP_Translations::$dictionary) ? SvelteWP_Translations::$dictionary : [],
-                'common_settings' => [
-                    'mouse_over_menu' => !empty(get_option('sveltewp_mouse_over_menu')) ? true : false
-                ],
                 'pubnub' => [
                     'publish_key' => get_option('sveltewp_publish_key') ?? '',
                     'subscribe_key' => get_option('sveltewp_subscribe_key') ?? ''

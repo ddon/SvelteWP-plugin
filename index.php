@@ -53,7 +53,6 @@ add_action('init', function () {
         register_setting('sveltewp_options_group', 'sveltewp_subscribe_key');
         register_setting('sveltewp_options_group', 'sveltewp_header_page_id');
         register_setting('sveltewp_options_group', 'sveltewp_footer_page_id');
-        register_setting('sveltewp_options_group', 'sveltewp_mouse_over_menu');
         register_setting('sveltewp_options_group', 'sveltewp_cached_pages_ids');
 
         $menus_needed = get_menus_needed();
@@ -145,20 +144,6 @@ add_action('init', function () {
                     }
                 ?>
                 </p>
-
-                <h3>Common settings:</h3>
-                <table class="form-table">
-                    <tbody>
-                        <tr>
-                            <th scope="row"><label for="sveltewp_mouse_over_menu">Mouse over menu</label></th>
-                            <td>
-                                <fieldset>
-                                    <input name="sveltewp_mouse_over_menu" type="checkbox" id="sveltewp_mouse_over_menu" <?= !empty(get_option('sveltewp_mouse_over_menu')) ? ' checked' : ''; ?>>
-                                </fieldset>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
 
                 <?php
                 $get_pages_args = [
