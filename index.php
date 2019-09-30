@@ -54,6 +54,8 @@ add_action('init', function () {
         register_setting('sveltewp_options_group', 'sveltewp_header_page_id');
         register_setting('sveltewp_options_group', 'sveltewp_footer_page_id');
         register_setting('sveltewp_options_group', 'sveltewp_cached_pages_ids');
+        register_setting('sveltewp_options_group', 'sveltewp_css_list');
+        register_setting('sveltewp_options_group', 'sveltewp_js_list');
 
         $menus_needed = get_menus_needed();
         
@@ -424,6 +426,110 @@ add_action('init', function () {
                     </tbody>
                 </table>
 
+
+                <h3>CSS & JS:</h3>
+                <table class="wp-list-table widefat fixed striped languages" style="max-width: 700px">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="manage-column" style="width: 3.5em; text-align: center"></th>
+                            <th scope="col" class="manage-column">Files</th>
+                        </tr>
+                    </thead>
+                    <tbody id="the-list">
+
+                <?php
+                    $sveltewp_css_list = get_option('sveltewp_css_list');
+                    $sveltewp_js_list = get_option('sveltewp_js_list');
+
+                    if (empty($sveltewp_css_list)) {
+                        $sveltewp_css_list = [];
+                    }
+
+                    if (empty($sveltewp_js_list)) {
+                        $sveltewp_js_list = [];
+                    }
+
+                    $css_files = [
+                        '/wp-includes/css/dashicons.min.css',
+                        '/wp-includes/css/dist/block-library/style.min.css',
+                        '/wp-includes/css/dist/block-library/theme.min.css',
+                        '/wp-content/plugins/coblocks/dist/blocks.style.build.css',
+                        '/wp-content/themes/twentynineteen/style.css',
+                        '/wp-content/themes/twentynineteen/print.css',
+                        '/wp-includes/css/dist/block-library/style.min.css',
+                        '/wp-includes/css/dist/block-library/theme.min.css',
+                        '/wp-content/plugins/coblocks/dist/blocks.style.build.css'
+                    ];
+
+                    $script_files = [
+                        '/wp-includes/js/admin-bar.min.js',
+                        '/wp-includes/js/wp-embed.min.js',
+                        '/wp-includes/js/imagesloaded.min.js',
+                        '/wp-includes/js/masonry.min.js',
+                        '/wp-content/plugins/coblocks/dist/js/coblocks-masonry.min.js',
+                        '/wp-content/plugins/coblocks/dist/js/vendors/flickity.min.js',
+                        '/wp-includes/js/wp-embed.min.js',
+                        '/wp-includes/js/jquery/jquery.js',
+                        '/wp-includes/js/jquery/jquery-migrate.min.js'
+                    ];
+
+                    global $wp_styles;
+                    foreach ($wp_styles->queue as $asset) :
+                        $asset_obj = $wp_styles->registered[$asset];
+
+                        if (is_object($asset_obj)) {
+                            if (!empty($asset_obj->src) && strlen($asset_obj->src) > 3) {
+                                array_push($css_files, $asset_obj->src);
+                            }
+                        }
+                    endforeach;
+
+                    global $wp_scripts;
+                    foreach ($wp_scripts->queue as $asset) :
+                        $asset_obj = $wp_scripts->registered[$asset];
+
+                        if (is_object($asset_obj)) {
+                            if (!empty($asset_obj->src) && strlen($asset_obj->src) > 3) {
+                                array_push($script_files, $asset_obj->src);
+                            }
+                        }
+                    endforeach;
+
+                    ?>
+                    <tr>
+                        <td></td>
+                        <td><strong>CSS</strong></td>
+                    </tr>
+                    <?php
+
+                    foreach ($css_files as $css_file) {
+                        ?>
+                        <tr>
+                            <td style="text-align:center"><input type="checkbox" name="sveltewp_css_list[]" value="<?= $css_file ?>"<?= in_array($css_file, $sveltewp_css_list) ? ' checked' : ''; ?> autocomplete="off"></td>
+                            <td><?= $css_file ?></td>
+                        </tr>
+                        <?php
+                    }
+
+                    ?>
+                    <tr>
+                        <td></td>
+                        <td><strong>JS</strong></td>
+                    </tr>
+                    <?php
+
+                    foreach ($script_files as $script_file) {
+                        ?>
+                        <tr>
+                            <td style="text-align:center"><input type="checkbox" name="sveltewp_js_list[]" value="<?= $script_file ?>"<?= in_array($script_file, $sveltewp_js_list) ? ' checked' : ''; ?> autocomplete="off"></td>
+                            <td><?= $script_file ?></td>
+                        </tr>
+                        <?php
+                    }
+                ?>
+
+                    </tbody>
+                </table>
 
                 <h3>PubNub:</h3>
                 <p>For real-time content update, you need to subscribe to <a href='https://www.pubnub.com/'>PubNub</a> account and paste your keys here.</p>

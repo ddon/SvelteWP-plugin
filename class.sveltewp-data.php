@@ -323,6 +323,22 @@ class SvelteWP_Data
             $translations = [];
         }
 
+        $is_gutenberg_page = false;
+
+        if (has_blocks($page->post_content)) {
+            $blocks = parse_blocks($page->post_content);
+
+            if (!empty($blocks)) {
+                foreach ($blocks as $block) {
+                    if (!empty($block['blockName']) && ($block['blockName'] !== 'core/code' && $block['blockName'] !== 'core/paragraph')) {
+                        // YAML code in code block, so if found something else, then maybe its gutenberg media/images or something
+                        $is_gutenberg_page = true;
+                        break;
+                    }
+                }
+            }
+        }
+
         $content = self::content_to_yaml($page->post_content);
 
         return [
@@ -334,7 +350,8 @@ class SvelteWP_Data
             'modified' => $page->post_modified,
             'slug' => $page->slug,
             'language' => $language,
-            'translations' => $translations
+            'translations' => $translations,
+            'is_gutenberg' => $is_gutenberg_page
         ];
     }
 }

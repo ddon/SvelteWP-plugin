@@ -67,6 +67,9 @@ class SvelteWP_SiteAPI
             }
         }
 
+        $sveltewp_css_list = get_option('sveltewp_css_list');
+        $sveltewp_js_list = get_option('sveltewp_js_list');
+
         return [
             'ok' => true,
             'data' => [
@@ -85,6 +88,10 @@ class SvelteWP_SiteAPI
                 'pubnub' => [
                     'publish_key' => get_option('sveltewp_publish_key') ?? '',
                     'subscribe_key' => get_option('sveltewp_subscribe_key') ?? ''
+                ],
+                'assets' => [
+                    'css' => !empty($sveltewp_css_list) ? $sveltewp_css_list : [],
+                    'js' => !empty($sveltewp_js_list) ? $sveltewp_js_list : []
                 ]
             ]
         ];
