@@ -70,6 +70,22 @@ class SvelteWP_SiteAPI
         $sveltewp_css_list = get_option('sveltewp_css_list');
         $sveltewp_js_list = get_option('sveltewp_js_list');
 
+        if (!empty($sveltewp_css_list)) {
+            foreach ($sveltewp_css_list as $key => $css_src) {
+                if (substr($css_src, 0, 4) === "/wp-") {
+                    $sveltewp_css_list[$key] = get_home_url() . $css_src;
+                }
+            }
+        }
+
+        if (!empty($sveltewp_js_list)) {
+            foreach ($sveltewp_js_list as $key => $js_src) {
+                if (substr($js_src, 0, 4) === "/wp-") {
+                    $sveltewp_js_list[$key] = get_home_url() . $js_src;
+                }
+            }
+        }
+
         return [
             'ok' => true,
             'data' => [
