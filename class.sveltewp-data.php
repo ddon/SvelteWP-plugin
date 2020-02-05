@@ -348,7 +348,7 @@ class SvelteWP_Data
             'content' => $content,
             'date' => $page->post_date,
             'modified' => $page->post_modified,
-            'slug' => $page->slug,
+            'slug' => $page->post_name,
             'language' => $language,
             'translations' => $translations,
             'is_gutenberg' => $is_gutenberg_page
